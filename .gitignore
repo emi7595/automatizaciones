@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+*.sqlite3
+
+# FastAPI / Alembic
+migrations/versions/*.pyc
+alembic.ini
+*.db
+
+# React
+node_modules/
+build/
+dist/
+.cache/
+*.log
+
+# Environment variables
+*.env
+.env.*
+
+# VSCode / IDEs
+.vscode/
+.idea/
+*.swp
+
+# Docker
+*.pid
+*.seed
+*.bak
+*.tar
+*.gz
+*.zip
+*.tgz
+*.log
+
+# macOS
+.DS_Store
+
+# Render
+render.yaml
+
+db/

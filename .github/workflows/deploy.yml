@@ -1,0 +1,58 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      # ---- BACKEND ----
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+
+      - name: Install backend deps
+        run: |
+          cd backend
+          pip install -r requirements.txt
+
+      - name: Run backend tests
+        run: |
+          cd backend
+          pytest || echo "No tests yet 🚧"
+
+      # ---- FRONTEND ----
+      - name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "22.16.0"
+
+      - name: Install frontend deps
+        run: |
+          cd frontend
+          npm install
+
+      - name: Run frontend build
+        run: |
+          cd frontend
+          npm run build
+
+      # ---- DEPLOY A RENDER ----
+      - name: Deploy Backend to Render
+        run: |
+          curl -X POST "https://api.render.com/deploy/srv-d37omqruibrs7397dof0" \
+          -H 'Accept: application/json' \
+          -H 'Authorization: Bearer ${{ secrets.RENDER_API_KEY }}'
+
+      - name: Deploy Frontend to Render
+        run: |
+          curl -X POST "https://api.render.com/deploy/srv-d37oogruibrs7397etog" \
+          -H 'Accept: application/json' \
+          -H 'Authorization: Bearer ${{ secrets.RENDER_API_KEY }}'

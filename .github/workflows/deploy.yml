@@ -47,7 +47,7 @@ jobs:
       # ---- DEPLOY A RENDER ----
       - name: Deploy Backend to Render
         run: |
-          curl -X POST "https://api.render.com/deploy/${{ secrets.RENDER_BACKEND_SERVICE_ID }}" \
+          curl -v -X POST "https://api.render.com/deploy/${{ secrets.RENDER_BACKEND_SERVICE_ID }}" \
           -H 'Accept: application/json' \
           -H 'Authorization: Bearer ${{ secrets.RENDER_API_KEY }}'
 

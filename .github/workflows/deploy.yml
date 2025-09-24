@@ -2,7 +2,7 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: ["main"]
+    branches: ["test"]
 
 jobs:
   build-and-deploy:
@@ -20,12 +20,12 @@ jobs:
 
       - name: Install backend deps
         run: |
-          cd backend
+          cd backend_cursor
           pip install -r requirements.txt
 
       - name: Run backend tests
         run: |
-          cd backend
+          cd backend_cursor
           pytest || echo "No tests yet 🚧"
 
       # ---- FRONTEND ----
@@ -47,12 +47,12 @@ jobs:
       # ---- DEPLOY A RENDER ----
       - name: Deploy Backend to Render
         run: |
-          curl -X POST "https://api.render.com/deploy/srv-d37omqruibrs7397dof0" \
+          curl -X POST "https://api.render.com/deploy/${{ secrets.RENDER_BACKEND_SERVICE_ID }}" \
           -H 'Accept: application/json' \
           -H 'Authorization: Bearer ${{ secrets.RENDER_API_KEY }}'
 
       - name: Deploy Frontend to Render
         run: |
-          curl -X POST "https://api.render.com/deploy/srv-d37oogruibrs7397etog" \
+          curl -X POST "https://api.render.com/deploy/${{ secrets.RENDER_FRONTEND_SERVICE_ID }}" \
           -H 'Accept: application/json' \
           -H 'Authorization: Bearer ${{ secrets.RENDER_API_KEY }}'

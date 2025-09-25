@@ -18,7 +18,7 @@ class MessageSendRequest(BaseModel):
 class MessageSendResponse(BaseModel):
     """Schema for message send response."""
     success: bool
-    message_id: Optional[str] = None
+    message_id: Optional[int] = None
     error: Optional[str] = None
     whatsapp_message_id: Optional[str] = None
 

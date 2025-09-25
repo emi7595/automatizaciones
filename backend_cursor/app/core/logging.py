@@ -7,6 +7,8 @@ import sys
 from pathlib import Path
 from datetime import datetime
 from app.core.config import settings
+from functools import wraps
+import inspect
 
 
 class ColoredFormatter(logging.Formatter):
@@ -231,23 +233,32 @@ def log_function_call(logger: logging.Logger = None):
         logger: Logger instance (optional)
     """
     def decorator(func):
-        def wrapper(*args, **kwargs):
-            if logger is None:
-                func_logger = logging.getLogger(func.__module__)
-            else:
-                func_logger = logger
-            
-            func_logger.debug(f"Calling {func.__name__} with args={args}, kwargs={kwargs}")
-            
-            try:
-                result = func(*args, **kwargs)
-                func_logger.debug(f"{func.__name__} completed successfully")
-                return result
-            except Exception as e:
-                func_logger.error(f"{func.__name__} failed with error: {str(e)}")
-                raise
-        
-        return wrapper
+        if inspect.iscoroutinefunction(func):
+            @wraps(func)
+            async def async_wrapper(*args, **kwargs):
+                func_logger = logging.getLogger(func.__module__) if logger is None else logger
+                func_logger.debug(f"Calling {func.__name__} with args={args}, kwargs={kwargs}")
+                try:
+                    result = await func(*args, **kwargs)
+                    func_logger.debug(f"{func.__name__} completed successfully")
+                    return result
+                except Exception as e:
+                    func_logger.error(f"{func.__name__} failed with error: {str(e)}")
+                    raise
+            return async_wrapper
+        else:
+            @wraps(func)
+            def sync_wrapper(*args, **kwargs):
+                func_logger = logging.getLogger(func.__module__) if logger is None else logger
+                func_logger.debug(f"Calling {func.__name__} with args={args}, kwargs={kwargs}")
+                try:
+                    result = func(*args, **kwargs)
+                    func_logger.debug(f"{func.__name__} completed successfully")
+                    return result
+                except Exception as e:
+                    func_logger.error(f"{func.__name__} failed with error: {str(e)}")
+                    raise
+            return sync_wrapper
     return decorator
 
 
@@ -260,26 +271,40 @@ def log_performance(logger: logging.Logger = None):
         logger: Logger instance (optional)
     """
     def decorator(func):
-        def wrapper(*args, **kwargs):
-            if logger is None:
-                func_logger = logging.getLogger(func.__module__)
-            else:
-                func_logger = logger
-            
-            start_time = datetime.now()
-            func_logger.debug(f"Starting {func.__name__}")
-            
-            try:
-                result = func(*args, **kwargs)
-                end_time = datetime.now()
-                execution_time = (end_time - start_time).total_seconds()
-                func_logger.info(f"{func.__name__} completed in {execution_time:.3f}s")
-                return result
-            except Exception as e:
-                end_time = datetime.now()
-                execution_time = (end_time - start_time).total_seconds()
-                func_logger.error(f"{func.__name__} failed after {execution_time:.3f}s with error: {str(e)}")
-                raise
-        
-        return wrapper
+        if inspect.iscoroutinefunction(func):
+            @wraps(func)
+            async def async_wrapper(*args, **kwargs):
+                func_logger = logging.getLogger(func.__module__) if logger is None else logger
+                start_time = datetime.now()
+                func_logger.debug(f"Starting {func.__name__}")
+                try:
+                    result = await func(*args, **kwargs)
+                    end_time = datetime.now()
+                    execution_time = (end_time - start_time).total_seconds()
+                    func_logger.info(f"{func.__name__} completed in {execution_time:.3f}s")
+                    return result
+                except Exception as e:
+                    end_time = datetime.now()
+                    execution_time = (end_time - start_time).total_seconds()
+                    func_logger.error(f"{func.__name__} failed after {execution_time:.3f}s with error: {str(e)}")
+                    raise
+            return async_wrapper
+        else:
+            @wraps(func)
+            def sync_wrapper(*args, **kwargs):
+                func_logger = logging.getLogger(func.__module__) if logger is None else logger
+                start_time = datetime.now()
+                func_logger.debug(f"Starting {func.__name__}")
+                try:
+                    result = func(*args, **kwargs)
+                    end_time = datetime.now()
+                    execution_time = (end_time - start_time).total_seconds()
+                    func_logger.info(f"{func.__name__} completed in {execution_time:.3f}s")
+                    return result
+                except Exception as e:
+                    end_time = datetime.now()
+                    execution_time = (end_time - start_time).total_seconds()
+                    func_logger.error(f"{func.__name__} failed after {execution_time:.3f}s with error: {str(e)}")
+                    raise
+            return sync_wrapper
     return decorator

@@ -85,7 +85,7 @@ class MessageService:
                 whatsapp_message_id=result["message_id"],
                 status=MessageStatus.SENT,
                 sent_at=datetime.now(),
-                metadata=request.metadata,
+                extra_metadata=request.metadata,
                 created_by=user_id
             )
             
@@ -161,7 +161,7 @@ class MessageService:
                 whatsapp_message_id=result["message_id"],
                 status=MessageStatus.SENT,
                 sent_at=datetime.now(),
-                metadata={
+                extra_metadata={
                     "template_name": template_name,
                     "language": language,
                     "components": components
@@ -393,7 +393,7 @@ class MessageService:
                 whatsapp_message_id=message_data['message_id'],
                 status=MessageStatus.DELIVERED,
                 sent_at=datetime.fromtimestamp(int(message_data['timestamp'])),
-                metadata=message_data.get('raw_data', {}),
+                extra_metadata=message_data.get('raw_data', {}),
                 created_by=None  # Incoming message
             )
             

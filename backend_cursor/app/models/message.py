@@ -50,7 +50,7 @@ class Message(Base):
     delivered_at = Column(DateTime(timezone=True), nullable=True)
     read_at = Column(DateTime(timezone=True), nullable=True)
     error_message = Column(Text, nullable=True)
-    metadata = Column(JSON, nullable=True)  # Flexible metadata storage
+    extra_metadata = Column("metadata", JSON, nullable=True)  # Flexible metadata storage
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     created_by = Column(Integer, ForeignKey("users.id"), nullable=True)  # Null for inbound messages
     

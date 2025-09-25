@@ -1,7 +1,7 @@
 """
 Pydantic schemas for message-related API operations.
 """
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 from app.models.message import MessageDirection, MessageType, MessageStatus
@@ -25,6 +25,7 @@ class MessageSendResponse(BaseModel):
 
 class MessageRead(BaseModel):
     """Schema for reading a message."""
+    model_config = ConfigDict(from_attributes=True)
     id: int
     contact_id: int
     conversation_id: str
@@ -37,7 +38,7 @@ class MessageRead(BaseModel):
     delivered_at: Optional[datetime]
     read_at: Optional[datetime]
     error_message: Optional[str]
-    metadata: Optional[Dict[str, Any]]
+    metadata: Optional[Dict[str, Any]] = Field(default=None, validation_alias='extra_metadata')
     created_at: datetime
     created_by: Optional[int]
     

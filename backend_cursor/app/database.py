@@ -27,6 +27,16 @@ logger.info("Database session factory created")
 Base = declarative_base()
 logger.info("Database base class created")
 
+# IMPORTANT: Import all model modules so SQLAlchemy registers their tables
+# before calling Base.metadata.create_all(). Without these imports, foreign
+# keys like messages.created_by -> users.id may fail if the target table
+# isn't loaded into the metadata yet.
+from app.models import user  # noqa: F401
+from app.models import contact  # noqa: F401
+from app.models import message  # noqa: F401
+from app.models import automation  # noqa: F401
+from app.models import automation_log  # noqa: F401
+
 
 def get_db():
     """

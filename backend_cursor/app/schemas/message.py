@@ -42,8 +42,6 @@ class MessageRead(BaseModel):
     created_at: datetime
     created_by: Optional[int]
     
-    class Config:
-        from_attributes = True
 
 
 class MessageListResponse(BaseModel):

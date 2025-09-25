@@ -1,7 +1,7 @@
 """
 Automation model with comprehensive trigger and action support.
 """
-from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, ForeignKey, JSON, Enum
+from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, ForeignKey, JSON, Enum as SAEnum
 from sqlalchemy.sql import func
 from app.database import Base
 import enum
@@ -36,9 +36,23 @@ class Automation(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(100), nullable=False)
     description = Column(Text, nullable=True)
-    trigger_type = Column(Enum(TriggerType), nullable=False)
+    trigger_type = Column(
+        SAEnum(
+            TriggerType,
+            values_callable=lambda x: [e.value for e in x],
+            validate_strings=True
+        ),
+        nullable=False
+    )
     trigger_conditions = Column(JSON, nullable=True)  # Flexible trigger conditions
-    action_type = Column(Enum(ActionType), nullable=False)
+    action_type = Column(
+        SAEnum(
+            ActionType,
+            values_callable=lambda x: [e.value for e in x],
+            validate_strings=True
+        ),
+        nullable=False
+    )
     action_payload = Column(JSON, nullable=False)  # Action configuration
     schedule_config = Column(JSON, nullable=True)  # For scheduled/recurring automations
     is_active = Column(Boolean, default=True, nullable=False)

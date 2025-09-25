@@ -1,7 +1,7 @@
 """
 Message model with threading support and comprehensive metadata.
 """
-from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, ForeignKey, JSON, Enum
+from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, ForeignKey, JSON, Enum as SAEnum
 from sqlalchemy.sql import func
 from app.database import Base
 import enum
@@ -41,11 +41,34 @@ class Message(Base):
     id = Column(Integer, primary_key=True, index=True)
     contact_id = Column(Integer, ForeignKey("contacts.id"), nullable=False, index=True)
     conversation_id = Column(String(36), nullable=False, index=True)  # UUID for threading
-    direction = Column(Enum(MessageDirection), nullable=False)
-    message_type = Column(Enum(MessageType), default=MessageType.TEXT, nullable=False)
+    direction = Column(
+        SAEnum(
+            MessageDirection,
+            values_callable=lambda x: [e.value for e in x],
+            validate_strings=True
+        ),
+        nullable=False
+    )
+    message_type = Column(
+        SAEnum(
+            MessageType,
+            values_callable=lambda x: [e.value for e in x],
+            validate_strings=True
+        ),
+        default=MessageType.TEXT,
+        nullable=False
+    )
     content = Column(Text, nullable=False)
     whatsapp_message_id = Column(String(100), nullable=True, index=True)  # WhatsApp API message ID
-    status = Column(Enum(MessageStatus), default=MessageStatus.PENDING, nullable=False)
+    status = Column(
+        SAEnum(
+            MessageStatus,
+            values_callable=lambda x: [e.value for e in x],
+            validate_strings=True
+        ),
+        default=MessageStatus.PENDING,
+        nullable=False
+    )
     sent_at = Column(DateTime(timezone=True), nullable=True)
     delivered_at = Column(DateTime(timezone=True), nullable=True)
     read_at = Column(DateTime(timezone=True), nullable=True)

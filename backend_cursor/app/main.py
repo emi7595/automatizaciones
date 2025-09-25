@@ -8,11 +8,12 @@ from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 import logging
 from app.core.config import settings
+from app.core.logging import setup_logging, get_logger
 from app.database import create_tables
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# Setup comprehensive logging
+setup_logging()
+logger = get_logger(__name__)
 
 # Create FastAPI application
 app = FastAPI(
@@ -94,15 +95,28 @@ async def general_exception_handler(request: Request, exc: Exception):
 async def startup_event():
     """Application startup event."""
     logger.info("Starting WhatsApp Automation MVP...")
-    # Create database tables
-    create_tables()
-    logger.info("Database tables created successfully")
+    logger.info(f"Environment: {settings.ENVIRONMENT}")
+    logger.info(f"Debug mode: {settings.DEBUG}")
+    logger.info(f"Database URL configured: {bool(settings.DATABASE_URL)}")
+    logger.info(f"WhatsApp token configured: {bool(settings.WHATSAPP_TOKEN)}")
+    
+    try:
+        # Create database tables
+        logger.info("Creating database tables...")
+        create_tables()
+        logger.info("Database tables created successfully")
+    except Exception as e:
+        logger.error(f"Failed to create database tables: {str(e)}")
+        raise
+    
+    logger.info("WhatsApp Automation MVP started successfully")
 
 
 @app.on_event("shutdown")
 async def shutdown_event():
     """Application shutdown event."""
     logger.info("Shutting down WhatsApp Automation MVP...")
+    logger.info("Shutdown completed")
 
 
 @app.get("/")
@@ -128,16 +142,12 @@ async def health_check():
     }
 
 
-# Include API routers (will be added in future phases)
-# from app.api.contacts import router as contacts_router
-# from app.api.messages import router as messages_router
-# from app.api.automations import router as automations_router
-# from app.api.webhooks import router as webhooks_router
+# Include API routers
+from app.api.messages import router as messages_router
+from app.api.webhooks import router as webhooks_router
 
-# app.include_router(contacts_router, prefix="/api/v1")
-# app.include_router(messages_router, prefix="/api/v1")
-# app.include_router(automations_router, prefix="/api/v1")
-# app.include_router(webhooks_router, prefix="/api/v1")
+app.include_router(messages_router)
+app.include_router(webhooks_router)
 
 
 if __name__ == "__main__":

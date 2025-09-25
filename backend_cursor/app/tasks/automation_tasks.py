@@ -84,7 +84,7 @@ def check_birthday_automations(self):
         }
         
     except Exception as e:
-        logger.error(f"Error in birthday automation check: {e}")
+        logger.error(f"Error in birthday automation check: {str(e)}")
         return {"status": "failed", "error": str(e)}
     finally:
         db.close()
@@ -111,7 +111,7 @@ def execute_automation_for_contact(self, automation_id: int, contact_id: int):
         return {"status": "completed", "result": result}
         
     except Exception as e:
-        logger.error(f"Error executing automation {automation_id} for contact {contact_id}: {e}")
+        logger.error(f"Error executing automation {automation_id} for contact {contact_id}: {str(e)}")
         return {"status": "failed", "error": str(e)}
     finally:
         db.close()
@@ -142,7 +142,7 @@ def execute_automation_for_contact(automation: Automation, contact: Contact, db)
             return False
             
     except Exception as e:
-        logger.error(f"Error executing automation: {e}")
+        logger.error(f"Error executing automation: {str(e)}")
         return False
 
 
@@ -163,5 +163,5 @@ def log_automation_execution(automation_id: int, contact_id: int, status: Execut
         db.add(log_entry)
         db.commit()
     except Exception as e:
-        logger.error(f"Error logging automation execution: {e}")
+        logger.error(f"Error logging automation execution: {str(e)}")
         db.rollback()

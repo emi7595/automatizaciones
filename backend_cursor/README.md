@@ -1,8 +1,6 @@
-# WhatsApp Automation MVP - Backend Cursor
+# WhatsApp Automation MVP - Backend
 
-A comprehensive FastAPI backend for WhatsApp automation with contact management, message handling, and automation engine.
-
-## 🏗️ Architecture Overview
+## Architecture Overview
 
 This backend implements a complete WhatsApp automation system with the following components:
 
@@ -36,19 +34,13 @@ cd backend_cursor
 
 2. **Start development environment:**
 ```bash
-# Quick start with automated setup
-./scripts/dev.sh
-
-# Or manually
 docker-compose up -d
 ```
 
-3. **Run database migrations:**
+3. **Set up database schema:**
 ```bash
-./scripts/migrate.sh
-
-# Or manually
-docker-compose exec backend alembic upgrade head
+# Database schema is automatically applied via docker-compose
+# The database_schema.sql file is mounted and executed on PostgreSQL startup
 ```
 
 4. **Access the application:**
@@ -81,10 +73,7 @@ cp env.example .env
 # Create database
 createdb automatizaciones
 
-# Run migrations
-alembic upgrade head
-
-# Or use the complete schema
+# Apply complete schema
 psql -d automatizaciones -f database_schema.sql
 ```
 
@@ -163,11 +152,7 @@ backend_cursor/
 │   │   └── analytics_tasks.py
 │   ├── database.py           # Database configuration
 │   └── main.py              # FastAPI application
-├── scripts/                  # Deployment scripts
-│   ├── dev.sh               # Development startup
-│   ├── prod.sh              # Production deployment
-│   └── migrate.sh           # Database migrations
-├── alembic/                  # Database migrations
+├── database_schema.sql       # Complete SQL schema
 ├── Dockerfile               # Multi-stage production image
 ├── docker-compose.yml       # Development environment
 ├── docker-compose.prod.yml  # Production environment
@@ -179,26 +164,26 @@ backend_cursor/
 └── README.md               # This file
 ```
 
-## 🔄 Database Migrations
+## 🔄 Database Schema Management
 
-### Using Alembic
+### Manual Schema Setup
 
 ```bash
-# Create new migration
-alembic revision --autogenerate -m "Description of changes"
+# Apply complete schema (recommended)
+psql -d automatizaciones -f database_schema.sql
 
-# Apply migrations
-alembic upgrade head
-
-# Rollback migration
-alembic downgrade -1
+# Or use Docker Compose (automatic)
+docker-compose up -d
 ```
 
-### Using SQL Schema
+### Schema Updates
 
 ```bash
-# Apply complete schema
-psql -d automatizaciones -f database_schema.sql
+# For schema changes, manually run SQL commands
+psql -d automatizaciones -c "ALTER TABLE contacts ADD COLUMN new_field VARCHAR(100);"
+
+# Or create new SQL files for specific changes
+psql -d automatizaciones -f schema_update_v2.sql
 ```
 
 ## 📈 Performance Considerations
@@ -252,12 +237,12 @@ pytest --cov=app
    - `SECRET_KEY`
    - `ALLOWED_ORIGINS`
 3. Deploy automatically on push to main branch
-4. Alembic migrations run automatically on deployment
+4. Database schema is applied automatically via `database_schema.sql`
 
 **Step 3: Verify Deployment**
 - Check Render logs for successful database connection
 - Verify API endpoints at `https://your-app.onrender.com`
-- Check database schema with `alembic current`
+- Check database schema with `psql` commands
 
 ### Local Development
 ```bash

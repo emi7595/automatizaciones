@@ -64,8 +64,9 @@ README.md
 .env.*
 !.env.example
 
-# Logs
-*.log
+# Logs (keep logs directory structure but ignore log files)
+logs/*.log
+logs/*.log.*
 logs/
 
 # Database

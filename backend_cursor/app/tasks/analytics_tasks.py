@@ -69,7 +69,7 @@ def update_system_analytics(self):
         }
         
     except Exception as e:
-        logger.error(f"Error updating system analytics: {e}")
+        logger.error(f"Error updating system analytics: {str(e)}")
         db.rollback()
         return {"status": "failed", "error": str(e)}
     finally:
@@ -116,7 +116,7 @@ def cleanup_old_logs(self, days_to_keep: int = 30):
         }
         
     except Exception as e:
-        logger.error(f"Error cleaning up old logs: {e}")
+        logger.error(f"Error cleaning up old logs: {str(e)}")
         db.rollback()
         return {"status": "failed", "error": str(e)}
     finally:
@@ -172,7 +172,7 @@ def calculate_automation_performance(self, automation_id: int):
         }
         
     except Exception as e:
-        logger.error(f"Error calculating automation performance: {e}")
+        logger.error(f"Error calculating automation performance: {str(e)}")
         db.rollback()
         return {"status": "failed", "error": str(e)}
     finally:

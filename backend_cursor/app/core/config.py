@@ -13,10 +13,10 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "postgresql://user:password@localhost/automatizaciones"  # Default for local development
     
     # WhatsApp Cloud API - All required for production
-    WHATSAPP_TOKEN: Optional[str] = None
-    PHONE_NUMBER_ID: Optional[str] = None
-    BUSINESS_ID: Optional[str] = None
-    WEBHOOK_VERIFY_TOKEN: Optional[str] = None
+    WHATSAPP_TOKEN: os.getenv("WHATSAPP_TOKEN")
+    PHONE_NUMBER_ID: os.getenv("PHONE_NUMBER_ID")
+    BUSINESS_ID: os.getenv("BUSINESS_ID")
+    WEBHOOK_VERIFY_TOKEN: os.getenv("WEBHOOK_VERIFY_TOKEN")
     
     # Security - Must be set in production
     SECRET_KEY: str = os.getenv("SECRET_KEY")

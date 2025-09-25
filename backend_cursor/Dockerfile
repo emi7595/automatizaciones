@@ -48,8 +48,6 @@ WORKDIR /app
 
 # Copy application code
 COPY app/ ./app/
-COPY alembic/ ./alembic/
-COPY alembic.ini .
 
 # Change ownership to appuser
 RUN chown -R appuser:appuser /app

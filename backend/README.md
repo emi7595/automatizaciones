@@ -29,7 +29,7 @@ This backend implements a complete WhatsApp automation system with the following
 
 1. **Clone and navigate to the project:**
 ```bash
-cd backend_cursor
+cd backend
 ```
 
 2. **Start development environment:**
@@ -130,39 +130,6 @@ The schema includes optimized indexes for:
 - Message queries (contact, conversation, status)
 - Automation filtering (trigger type, active status)
 - Analytics queries (metric type, time ranges)
-
-## 🏛️ Project Structure
-
-```
-backend_cursor/
-├── app/
-│   ├── core/
-│   │   ├── config.py          # Application configuration
-│   │   └── celery.py          # Celery background tasks
-│   ├── models/
-│   │   ├── user.py           # User authentication
-│   │   ├── contact.py        # Enhanced contacts
-│   │   ├── message.py        # Threaded messages
-│   │   ├── automation.py     # Automation rules
-│   │   ├── automation_log.py # Execution logs
-│   │   └── analytics.py      # Metrics tracking
-│   ├── tasks/                # Background task modules
-│   │   ├── automation_tasks.py
-│   │   ├── message_tasks.py
-│   │   └── analytics_tasks.py
-│   ├── database.py           # Database configuration
-│   └── main.py              # FastAPI application
-├── database_schema.sql       # Complete SQL schema
-├── Dockerfile               # Multi-stage production image
-├── docker-compose.yml       # Development environment
-├── docker-compose.prod.yml  # Production environment
-├── .dockerignore           # Docker ignore patterns
-├── requirements.txt         # Python dependencies
-├── database_schema.sql     # Complete SQL schema
-├── env.example             # Environment template
-├── DOCKER.md               # Docker documentation
-└── README.md               # This file
-```
 
 ## 🔄 Database Schema Management
 

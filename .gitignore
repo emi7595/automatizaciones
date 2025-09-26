@@ -11,7 +11,6 @@ ENV/
 
 # FastAPI / Alembic
 migrations/versions/*.pyc
-alembic.ini
 *.db
 
 # React

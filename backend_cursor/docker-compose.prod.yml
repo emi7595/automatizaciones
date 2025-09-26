@@ -1,0 +1,157 @@
+# WhatsApp Automation MVP - Production Docker Compose
+version: '3.8'
+
+services:
+  # PostgreSQL Database (Production)
+  postgres:
+    image: postgres:15-alpine
+    container_name: automatizaciones_postgres_prod
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-automatizaciones}
+      POSTGRES_USER: ${POSTGRES_USER:-automatizaciones_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-automatizaciones_user} -d ${POSTGRES_DB:-automatizaciones}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - automatizaciones_network_prod
+    restart: unless-stopped
+
+  # Redis for Background Tasks (Production)
+  redis:
+    image: redis:7-alpine
+    container_name: automatizaciones_redis_prod
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis_data_prod:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - automatizaciones_network_prod
+    restart: unless-stopped
+
+  # FastAPI Backend (Production)
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: automatizaciones_backend_prod
+    environment:
+      # Database
+      DATABASE_URL: ${DATABASE_URL}
+      
+      # Redis
+      REDIS_URL: ${REDIS_URL}
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL}
+      CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
+      
+      # Application
+      DEBUG: "false"
+      ENVIRONMENT: "production"
+      SECRET_KEY: ${SECRET_KEY}
+      
+      # CORS
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
+      
+      # WhatsApp
+      WHATSAPP_TOKEN: ${WHATSAPP_TOKEN}
+      PHONE_NUMBER_ID: ${PHONE_NUMBER_ID}
+      BUSINESS_ID: ${BUSINESS_ID}
+      WEBHOOK_VERIFY_TOKEN: ${WEBHOOK_VERIFY_TOKEN}
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - automatizaciones_network_prod
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+
+  # Celery Worker (Production)
+  celery_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: automatizaciones_celery_worker_prod
+    command: celery -A app.core.celery worker --loglevel=info --concurrency=2
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: ${REDIS_URL}
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL}
+      CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
+      DEBUG: "false"
+      ENVIRONMENT: "production"
+      SECRET_KEY: ${SECRET_KEY}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - automatizaciones_network_prod
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+
+  # Celery Beat (Production)
+  celery_beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: automatizaciones_celery_beat_prod
+    command: celery -A app.core.celery beat --loglevel=info
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: ${REDIS_URL}
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL}
+      CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
+      DEBUG: "false"
+      ENVIRONMENT: "production"
+      SECRET_KEY: ${SECRET_KEY}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - automatizaciones_network_prod
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
+
+volumes:
+  postgres_data_prod:
+    driver: local
+  redis_data_prod:
+    driver: local
+
+networks:
+  automatizaciones_network_prod:
+    driver: bridge

@@ -6,7 +6,7 @@ from app.core.celery import celery_app
 from app.database import SessionLocal
 from app.models.automation import Automation
 from app.models.contact import Contact
-from app.models.automation_log import AutomationLog, AutomationExecutionStatus
+from app.models.automation_log import AutomationLog, ExecutionStatus
 from app.services.automation_engine import AutomationEngine
 from datetime import datetime, date
 from app.core.logging import get_logger, log_performance

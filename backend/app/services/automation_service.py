@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_, desc, func
 
 from app.models.automation import Automation, TriggerType, ActionType
-from app.models.automation_log import AutomationLog, AutomationExecutionStatus
+from app.models.automation_log import AutomationLog, ExecutionStatus
 from app.models.contact import Contact
 from app.models.message import Message, MessageDirection, MessageType, MessageStatus
 from app.schemas.automation import (
@@ -355,7 +355,7 @@ class AutomationService:
             # Success rate
             total_executions = self.db.query(AutomationLog).count()
             successful_executions = self.db.query(AutomationLog).filter(
-                AutomationLog.execution_status == AutomationExecutionStatus.SUCCESS
+                AutomationLog.execution_status == ExecutionStatus.SUCCESS
             ).count()
             
             success_rate = (successful_executions / total_executions * 100) if total_executions > 0 else 0
@@ -701,7 +701,7 @@ class AutomationService:
         try:
             execution_log = AutomationLog(
                 automation_id=automation.id,
-                execution_status=AutomationExecutionStatus.SUCCESS if not errors else AutomationExecutionStatus.PARTIAL,
+                execution_status=ExecutionStatus.SUCCESS if not errors else ExecutionStatus.PARTIAL,
                 execution_time=execution_time,
                 contacts_affected=contacts_affected,
                 error_message="; ".join(errors) if errors else None,

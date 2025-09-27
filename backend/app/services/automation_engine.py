@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_, desc, func
 
 from app.models.automation import Automation, TriggerType, ActionType
-from app.models.automation_log import AutomationLog, AutomationExecutionStatus
+from app.models.automation_log import AutomationLog, ExecutionStatus
 from app.models.contact import Contact
 from app.models.message import Message, MessageDirection, MessageType, MessageStatus
 from app.core.logging import get_logger, log_performance
@@ -581,7 +581,7 @@ class AutomationEngine:
             execution_log = AutomationLog(
                 automation_id=automation.id,
                 contact_id=contact.id,
-                execution_status=AutomationExecutionStatus.SUCCESS if result["success"] else AutomationExecutionStatus.FAILED,
+                execution_status=ExecutionStatus.SUCCESS if result["success"] else ExecutionStatus.FAILED,
                 execution_time=execution_time,
                 contacts_affected=1 if result["success"] else 0,
                 error_message=result.get("error"),

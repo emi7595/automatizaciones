@@ -30,7 +30,7 @@ class Settings(BaseSettings):
     ]
     
     # Redis - Dynamic Redis URL support
-    # For Railway: Use Railway Redis service
+    # For Render: Use database as fallback if Redis not available
     REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379")
     CELERY_BROKER_URL: str = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379")
     CELERY_RESULT_BACKEND: str = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379")

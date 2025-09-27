@@ -44,7 +44,11 @@ celery_app.conf.update(
     beat_schedule={
         "check-birthday-automations": {
             "task": "app.tasks.automation_tasks.check_birthday_automations",
-            "schedule": 86400.0,  # Daily at midnight
+            "schedule": 60.0,  # Run every minute
+        },
+        "process-scheduled-automations": {
+            "task": "app.tasks.automation_tasks.process_scheduled_automations",
+            "schedule": 60.0,  # Run every minute
         },
         "cleanup-old-logs": {
             "task": "app.tasks.analytics_tasks.cleanup_old_logs",

@@ -407,6 +407,14 @@ class MessageService:
             
             logger.info(f"Incoming message processed: {message.id} from contact {contact.id}")
             
+            # Trigger message-based automations
+            try:
+                from app.tasks.automation_tasks import process_message_automation
+                process_message_automation.delay(message.id)
+                logger.info(f"Message automation triggered for message {message.id}")
+            except Exception as e:
+                logger.error(f"Error triggering message automation: {str(e)}")
+            
             return {
                 "success": True,
                 "message_id": message.id,

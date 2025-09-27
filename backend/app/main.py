@@ -145,9 +145,11 @@ async def health_check():
 # Include API routers
 from app.api.messages import router as messages_router
 from app.api.webhooks import router as webhooks_router
+from app.api.automations import router as automations_router
 
 app.include_router(messages_router)
 app.include_router(webhooks_router)
+app.include_router(automations_router)
 
 
 if __name__ == "__main__":

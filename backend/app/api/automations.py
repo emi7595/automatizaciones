@@ -220,7 +220,7 @@ async def execute_automation(
         )
         
         automation_service = AutomationService(db)
-        result = automation_service.execute_automation(request, user_id=1)  # TODO: Get from auth
+        result = await automation_service.execute_automation(request, user_id=1)  # TODO: Get from auth
         
         if not result["success"]:
             logger.error(f"API: Automation execution failed: {result['error']}")

@@ -277,7 +277,7 @@ class AutomationService:
             return {"success": False, "error": str(e)}
     
     @log_performance()
-    def execute_automation(self, request: AutomationExecutionRequest, user_id: int) -> Dict[str, Any]:
+    async def execute_automation(self, request: AutomationExecutionRequest, user_id: int) -> Dict[str, Any]:
         """
         Execute an automation manually.
         
@@ -306,7 +306,7 @@ class AutomationService:
                 return {"success": False, "error": "Automation is not active"}
             
             # Execute automation
-            execution_result = self._execute_automation_logic(
+            execution_result = await self._execute_automation_logic(
                 automation, request.contact_id, request.test_mode, user_id
             )
             
@@ -475,7 +475,7 @@ class AutomationService:
             logger.error(f"Error validating action payload: {str(e)}")
             return {"valid": False, "error": str(e)}
     
-    def _execute_automation_logic(self, automation: Automation, contact_id: Optional[int], 
+    async def _execute_automation_logic(self, automation: Automation, contact_id: Optional[int], 
                                  test_mode: bool, user_id: int) -> Dict[str, Any]:
         """Execute the automation logic."""
         start_time = datetime.now()
@@ -499,7 +499,7 @@ class AutomationService:
             
             for contact in contacts:
                 try:
-                    action_result = self._execute_action(automation, contact, test_mode, user_id)
+                    action_result = await self._execute_action(automation, contact, test_mode, user_id)
                     if action_result["success"]:
                         contacts_affected += 1
                     else:
@@ -600,11 +600,11 @@ class AutomationService:
             logger.error(f"Error finding contacts for automation: {str(e)}")
             return []
     
-    def _execute_action(self, automation: Automation, contact: Contact, test_mode: bool, user_id: int) -> Dict[str, Any]:
+    async def _execute_action(self, automation: Automation, contact: Contact, test_mode: bool, user_id: int) -> Dict[str, Any]:
         """Execute the automation action for a specific contact."""
         try:
             if automation.action_type == ActionType.SEND_MESSAGE:
-                return self._execute_send_message_action(automation, contact, test_mode, user_id)
+                return await self._execute_send_message_action(automation, contact, test_mode, user_id)
             
             elif automation.action_type == ActionType.UPDATE_CONTACT:
                 return self._execute_update_contact_action(automation, contact, test_mode, user_id)
@@ -620,7 +620,7 @@ class AutomationService:
             logger.error(f"Error executing action for contact {contact.id}: {str(e)}")
             return {"success": False, "error": str(e)}
     
-    def _execute_send_message_action(self, automation: Automation, contact: Contact, test_mode: bool, user_id: int) -> Dict[str, Any]:
+    async def _execute_send_message_action(self, automation: Automation, contact: Contact, test_mode: bool, user_id: int) -> Dict[str, Any]:
         """Execute send message action."""
         try:
             message_content = automation.action_payload.get("message", "")

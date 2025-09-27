@@ -4,6 +4,31 @@
 -- Enable UUID extension for conversation IDs
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+-- Celery tables for background task processing (Render compatibility)
+CREATE TABLE celery_taskmeta (
+    id SERIAL PRIMARY KEY,
+    task_id VARCHAR(255) UNIQUE NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    result JSONB,
+    date_done TIMESTAMP WITH TIME ZONE,
+    traceback TEXT,
+    hidden BOOLEAN NOT NULL DEFAULT false,
+    meta JSONB
+);
+
+CREATE TABLE celery_tasksetmeta (
+    id SERIAL PRIMARY KEY,
+    taskset_id VARCHAR(255) UNIQUE NOT NULL,
+    result JSONB,
+    date_done TIMESTAMP WITH TIME ZONE
+);
+
+-- Create indexes for Celery tables
+CREATE INDEX idx_celery_taskmeta_task_id ON celery_taskmeta(task_id);
+CREATE INDEX idx_celery_taskmeta_status ON celery_taskmeta(status);
+CREATE INDEX idx_celery_taskmeta_hidden ON celery_taskmeta(hidden);
+CREATE INDEX idx_celery_tasksetmeta_taskset_id ON celery_tasksetmeta(taskset_id);
+
 -- Users table for authentication and authorization
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,

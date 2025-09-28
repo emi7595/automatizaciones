@@ -91,7 +91,9 @@ elif settings.ENVIRONMENT == "production":
 # Debug: Log configuration on startup
 import logging
 logger = logging.getLogger(__name__)
+logger.info("🚀 CELERY WORKER STARTING UP...")
 logger.info(f"🔧 Celery broker URL: {settings.CELERY_BROKER_URL}")
 logger.info(f"🔧 Celery result backend: {settings.CELERY_RESULT_BACKEND}")
 logger.info(f"🔧 Backend API URL: {settings.BACKEND_API_URL}")
 logger.info(f"🔧 Environment: {settings.ENVIRONMENT}")
+logger.info("🚀 CELERY WORKER CONFIGURATION LOADED")

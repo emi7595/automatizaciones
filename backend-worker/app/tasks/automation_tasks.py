@@ -10,6 +10,10 @@ import asyncio
 
 logger = get_logger(__name__)
 
+# Log worker startup
+logger.info("🚀 AUTOMATION TASKS MODULE LOADED")
+logger.info("🚀 Worker is ready to process tasks")
+
 
 @celery_app.task(bind=True)
 def test_connection(self):

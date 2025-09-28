@@ -12,6 +12,13 @@ logger = get_logger(__name__)
 
 
 @celery_app.task(bind=True)
+def test_connection(self):
+    """Test task to verify worker is receiving tasks."""
+    logger.info("TEST TASK RECEIVED: Worker connection is working!")
+    return {"status": "success", "message": "Worker is receiving tasks"}
+
+
+@celery_app.task(bind=True)
 @log_performance()
 def check_birthday_automations(self):
     """
@@ -236,7 +243,10 @@ def process_message_automation(self, message_id: int):
     """
     Process message-based automations for a specific message via backend API.
     """
-    logger.info(f"Processing message automation for message {message_id}")
+    logger.info(f"🚀 TASK RECEIVED: Processing message automation for message {message_id}")
+    logger.info(f"Task ID: {self.request.id}")
+    logger.info(f"Task args: {self.request.args}")
+    logger.info(f"Task kwargs: {self.request.kwargs}")
     
     try:
         # Get message-based automations from backend API

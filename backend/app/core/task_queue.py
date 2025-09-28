@@ -15,15 +15,21 @@ class TaskQueue:
     def queue_message_automation(message_id: int):
         """Queue message automation task for worker."""
         try:
-            celery_app.send_task(
+            # Debug: Log the task details
+            logger.info(f"Attempting to queue message automation for message {message_id}")
+            logger.info(f"Celery broker URL: {celery_app.conf.broker_url}")
+            logger.info(f"Celery result backend: {celery_app.conf.result_backend}")
+            
+            result = celery_app.send_task(
                 'app.tasks.automation_tasks.process_message_automation',
                 args=[message_id],
                 queue='automation'
             )
-            logger.info(f"Message automation queued for message {message_id}")
+            logger.info(f"Message automation queued for message {message_id} - Task ID: {result.id}")
             return True
         except Exception as e:
             logger.error(f"Error queuing message automation: {str(e)}")
+            logger.exception("Full error traceback:")
             return False
     
     @staticmethod

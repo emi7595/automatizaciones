@@ -142,6 +142,93 @@ async def health_check():
     }
 
 
+@app.get("/test/redis")
+async def test_redis_connection():
+    """Test Redis connection and task queuing."""
+    try:
+        from app.core.celery import celery_app
+        from app.core.task_queue import TaskQueue
+        
+        logger.info("Testing Redis connection...")
+        
+        # Test broker connection
+        try:
+            stats = celery_app.control.inspect().stats()
+            logger.info("✅ Redis broker connection successful")
+        except Exception as e:
+            logger.error(f"❌ Redis broker connection failed: {str(e)}")
+            return {
+                "status": "error",
+                "message": f"Redis broker connection failed: {str(e)}",
+                "broker_url": celery_app.conf.broker_url,
+                "result_backend": celery_app.conf.result_backend
+            }
+        
+        # Test task queuing
+        try:
+            result = celery_app.send_task(
+                'app.tasks.automation_tasks.test_connection',
+                queue='automation'
+            )
+            logger.info(f"✅ Test task queued successfully! Task ID: {result.id}")
+            
+            return {
+                "status": "success",
+                "message": "Redis connection and task queuing working",
+                "task_id": result.id,
+                "broker_url": celery_app.conf.broker_url,
+                "result_backend": celery_app.conf.result_backend
+            }
+        except Exception as e:
+            logger.error(f"❌ Task queuing failed: {str(e)}")
+            return {
+                "status": "error",
+                "message": f"Task queuing failed: {str(e)}",
+                "broker_url": celery_app.conf.broker_url,
+                "result_backend": celery_app.conf.result_backend
+            }
+            
+    except Exception as e:
+        logger.error(f"❌ Redis test failed: {str(e)}")
+        return {
+            "status": "error",
+            "message": f"Redis test failed: {str(e)}"
+        }
+
+
+@app.get("/test/message-automation/{message_id}")
+async def test_message_automation(message_id: int):
+    """Test message automation task queuing."""
+    try:
+        from app.core.task_queue import TaskQueue
+        
+        logger.info(f"Testing message automation for message {message_id}")
+        
+        # Queue the task
+        success = TaskQueue.queue_message_automation(message_id)
+        
+        if success:
+            return {
+                "status": "success",
+                "message": f"Message automation queued for message {message_id}",
+                "message_id": message_id
+            }
+        else:
+            return {
+                "status": "error",
+                "message": f"Failed to queue message automation for message {message_id}",
+                "message_id": message_id
+            }
+            
+    except Exception as e:
+        logger.error(f"❌ Message automation test failed: {str(e)}")
+        return {
+            "status": "error",
+            "message": f"Message automation test failed: {str(e)}",
+            "message_id": message_id
+        }
+
+
 # Include API routers
 from app.api.messages import router as messages_router
 from app.api.webhooks import router as webhooks_router

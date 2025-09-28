@@ -146,10 +146,17 @@ async def health_check():
 from app.api.messages import router as messages_router
 from app.api.webhooks import router as webhooks_router
 from app.api.automations import router as automations_router
+from app.api.analytics import router as analytics_router
+from app.api.contacts import router as contacts_router
 
 app.include_router(messages_router)
 app.include_router(webhooks_router)
 app.include_router(automations_router)
+app.include_router(analytics_router)
+app.include_router(contacts_router)
+
+# Note: Background tasks are handled by backend-worker/
+# This backend only handles HTTP API requests and queues tasks for workers
 
 
 if __name__ == "__main__":

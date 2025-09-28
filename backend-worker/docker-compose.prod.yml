@@ -1,0 +1,84 @@
+version: '3.8'
+
+services:
+  # Celery Worker for Background Tasks (Production)
+  celery_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: automatizaciones_worker_prod
+    environment:
+      # Database (from environment variables)
+      DATABASE_URL: ${DATABASE_URL}
+      
+      # Redis (from environment variables)
+      REDIS_URL: ${REDIS_URL}
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL}
+      CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
+      
+      # Application
+      DEBUG: "false"
+      ENVIRONMENT: "production"
+      SECRET_KEY: ${SECRET_KEY}
+      
+      # Backend API
+      BACKEND_API_URL: ${BACKEND_API_URL}
+      
+      # WhatsApp
+      WHATSAPP_TOKEN: ${WHATSAPP_TOKEN}
+      PHONE_NUMBER_ID: ${PHONE_NUMBER_ID}
+      BUSINESS_ID: ${BUSINESS_ID}
+      WEBHOOK_VERIFY_TOKEN: ${WEBHOOK_VERIFY_TOKEN}
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+    command: celery -A app.core.celery worker --loglevel=info --concurrency=4
+
+  # Celery Beat Scheduler (Production)
+  celery_beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: automatizaciones_beat_prod
+    environment:
+      # Database (from environment variables)
+      DATABASE_URL: ${DATABASE_URL}
+      
+      # Redis (from environment variables)
+      REDIS_URL: ${REDIS_URL}
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL}
+      CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
+      
+      # Application
+      DEBUG: "false"
+      ENVIRONMENT: "production"
+      SECRET_KEY: ${SECRET_KEY}
+      
+      # Backend API
+      BACKEND_API_URL: ${BACKEND_API_URL}
+      
+      # WhatsApp
+      WHATSAPP_TOKEN: ${WHATSAPP_TOKEN}
+      PHONE_NUMBER_ID: ${PHONE_NUMBER_ID}
+      BUSINESS_ID: ${BUSINESS_ID}
+      WEBHOOK_VERIFY_TOKEN: ${WEBHOOK_VERIFY_TOKEN}
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.25'
+        reservations:
+          memory: 128M
+          cpus: '0.1'
+    command: celery -A app.core.celery beat --loglevel=info

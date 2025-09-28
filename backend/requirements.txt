@@ -16,8 +16,7 @@ httpx==0.28.1
 aiohttp==3.10.11
 requests==2.31.0
 
-# Background tasks and scheduling
-APScheduler==3.10.4
+# Background tasks and scheduling (minimal for task queuing only)
 celery==5.4.0
 redis==6.4.0
 

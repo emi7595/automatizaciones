@@ -407,13 +407,12 @@ class MessageService:
             
             logger.info(f"Incoming message processed: {message.id} from contact {contact.id}")
             
-            # Trigger message-based automations
+            # Trigger message-based automations (queued for worker)
             try:
-                from app.tasks.automation_tasks import process_message_automation
-                process_message_automation.delay(message.id)
-                logger.info(f"Message automation triggered for message {message.id}")
+                from app.core.task_queue import TaskQueue
+                TaskQueue.queue_message_automation(message.id)
             except Exception as e:
-                logger.error(f"Error triggering message automation: {str(e)}")
+                logger.error(f"Error queuing message automation: {str(e)}")
             
             return {
                 "success": True,

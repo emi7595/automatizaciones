@@ -1,15 +1,12 @@
 """
 Automation background tasks for processing triggers and actions.
+Uses backend API instead of duplicating business logic.
 """
 from celery import current_task
 from app.core.celery import celery_app
-from app.database import SessionLocal
-from app.models.automation import Automation
-from app.models.contact import Contact
-from app.models.automation_log import AutomationLog, ExecutionStatus
-from app.services.automation_engine import AutomationEngine
-from datetime import datetime, date
+from app.core.api_client import get_automations_by_trigger, execute_automation_for_contact, record_automation_result
 from app.core.logging import get_logger, log_performance
+import asyncio
 
 logger = get_logger(__name__)
 
@@ -19,32 +16,65 @@ logger = get_logger(__name__)
 def check_birthday_automations(self):
     """
     Check for contacts with birthdays today and trigger birthday automations.
+    Uses backend API to get automations and execute them.
     """
     logger.info("Processing birthday automations")
-    db = SessionLocal()
+    
     try:
-        automation_engine = AutomationEngine(db)
-        result = automation_engine.process_birthday_trigger()
+        # Get birthday automations from backend API
+        automations = asyncio.run(get_automations_by_trigger("birthday"))
         
-        if result["success"]:
-            logger.info(f"Birthday automations processed: {result['successful']}/{result['automations_processed']} successful")
-            return {
-                "status": "completed",
-                "automations_processed": result["automations_processed"],
-                "contacts_processed": result.get("contacts_processed", 0),
-                "successful": result["successful"],
-                "results": result.get("results", [])
-            }
-        else:
-            logger.error(f"Birthday automation processing failed: {result['error']}")
-            return {"status": "failed", "error": result["error"]}
+        if not automations:
+            logger.info("No birthday automations found")
+            return {"status": "completed", "automations_processed": 0}
+        
+        logger.info(f"Found {len(automations)} birthday automations")
+        
+        # Execute each automation via backend API
+        results = []
+        successful = 0
+        
+        for automation in automations:
+            try:
+                # Execute automation via backend API
+                result = asyncio.run(execute_automation_for_contact(
+                    automation["id"],
+                    contact_id=None,  # Backend will find contacts with birthdays
+                    user_id=None
+                ))
+                
+                if result.get("success"):
+                    successful += 1
+                    logger.info(f"Birthday automation {automation['id']} executed successfully")
+                else:
+                    logger.error(f"Birthday automation {automation['id']} failed: {result.get('error')}")
+                
+                results.append({
+                    "automation_id": automation["id"],
+                    "success": result.get("success", False),
+                    "result": result
+                })
+                
+            except Exception as e:
+                logger.error(f"Error executing birthday automation {automation['id']}: {str(e)}")
+                results.append({
+                    "automation_id": automation["id"],
+                    "success": False,
+                    "error": str(e)
+                })
+        
+        logger.info(f"Birthday automations processed: {successful}/{len(automations)} successful")
+        return {
+            "status": "completed",
+            "automations_processed": len(automations),
+            "successful": successful,
+            "results": results
+        }
         
     except Exception as e:
         logger.error(f"Error in birthday automation check: {str(e)}")
         logger.exception("Full error traceback:")
         return {"status": "failed", "error": str(e)}
-    finally:
-        db.close()
 
 
 @celery_app.task(bind=True)

@@ -1,237 +1,284 @@
-# WhatsApp Automation MVP - Backend
+# 🚀 WhatsApp Automation Backend API
 
-## Architecture Overview
+This is the main backend API service for the WhatsApp Automation MVP. It handles HTTP requests, WhatsApp integration, and API endpoints.
 
-This backend implements a complete WhatsApp automation system with the following components:
+## 🏗️ **Architecture**
 
-### Core Features
-- **Contact Management**: Enhanced contact system with metadata, tags, and birthday tracking
-- **Message System**: Threaded conversations with comprehensive status tracking
-- **Automation Engine**: Flexible trigger-action system with scheduling support
-- **Analytics**: Comprehensive metrics and performance tracking
-- **User Management**: Role-based authentication and authorization
-
-### Database Schema
-- **Users**: Authentication and user management
-- **Contacts**: Enhanced contact information with flexible metadata
-- **Messages**: Threaded message system with status tracking
-- **Automations**: Flexible automation rules with JSON configuration
-- **Automation Logs**: Execution tracking and performance monitoring
-- **Analytics**: Comprehensive metrics collection
-
-## 🚀 Quick Start
-
-### Prerequisites
-- Docker and Docker Compose
-- Git
-
-### Docker Development Setup
-
-1. **Clone and navigate to the project:**
-```bash
-cd backend
+```
+backend/
+├── app/                          # Application code
+│   ├── core/                    # Core configuration
+│   ├── models/                  # Database models
+│   ├── services/                # Business logic
+│   ├── api/                     # API endpoints
+│   └── schemas/                 # Data schemas
+├── Dockerfile                   # API container
+├── docker-compose.yml          # Development environment
+├── docker-compose.prod.yml     # Production environment
+├── requirements.txt            # Python dependencies
+├── env.example                 # Environment template
+└── README.md                   # This file
 ```
 
-2. **Start development environment:**
+## 🚀 **Quick Start**
+
+### **Development**
 ```bash
+# Start backend services (API + Database + Redis)
 docker-compose up -d
-```
 
-3. **Set up database schema:**
-```bash
-# Database schema is automatically applied via docker-compose
-# The database_schema.sql file is mounted and executed on PostgreSQL startup
-```
-
-4. **Access the application:**
-- **API**: http://localhost:8000
-- **Documentation**: http://localhost:8000/docs
-- **Health Check**: http://localhost:8000/health
-
-### Manual Setup (Without Docker)
-
-1. **Install Python 3.8+ and PostgreSQL 12+**
-2. **Create virtual environment:**
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
-
-3. **Install dependencies:**
-```bash
-pip install -r requirements.txt
-```
-
-4. **Configure environment:**
-```bash
-cp env.example .env
-# Edit .env with your actual values
-```
-
-5. **Set up database:**
-```bash
-# Create database
-createdb automatizaciones
-
-# Apply complete schema
-psql -d automatizaciones -f database_schema.sql
-```
-
-6. **Run the application:**
-```bash
-python -m app.main
-```
-
-## 📊 Database Schema
-
-### Key Design Decisions
-
-**Birthday Handling:**
-- Full date with year: `1990-05-15`
-- Unknown year placeholder: `9999-05-15`
-- Easy detection with `is_birthday_unknown_year` property
-
-**Message Threading:**
-- Auto-generated conversation UUIDs
-- Automatic conversation creation on first message
-- Threaded message history
-
-**Flexible JSON Fields:**
-- `trigger_conditions`: Complex automation triggers
-- `action_payload`: Flexible action configuration
-- `metadata`: Extensible message metadata
-- `dimensions`: Analytics filtering
-
-**Status Tracking:**
-- Message flow: `pending → sent → delivered → read`
-- Error handling with detailed error messages
-- Comprehensive execution logging
-
-## 🔧 Configuration
-
-### Environment Variables
-
-| Variable | Description | Required | Source |
-|----------|-------------|----------|---------|
-| `DATABASE_URL` | PostgreSQL connection string | Yes | **Auto-provided by Render** |
-| `WHATSAPP_TOKEN` | WhatsApp Cloud API access token | Yes | Manual configuration |
-| `PHONE_NUMBER_ID` | WhatsApp phone number ID | Yes | Manual configuration |
-| `BUSINESS_ID` | WhatsApp business ID | Yes | Manual configuration |
-| `WEBHOOK_VERIFY_TOKEN` | Webhook verification token | Yes | Manual configuration |
-| `SECRET_KEY` | JWT secret key | Yes | Manual configuration |
-| `ALLOWED_ORIGINS` | CORS allowed origins | Yes | Manual configuration |
-
-**Note**: `DATABASE_URL` is automatically provided by Render when you add a PostgreSQL service. You don't need to configure it manually!
-
-### Database Indexes
-
-The schema includes optimized indexes for:
-- Contact lookups (phone, email, birthday)
-- Message queries (contact, conversation, status)
-- Automation filtering (trigger type, active status)
-- Analytics queries (metric type, time ranges)
-
-## 🔄 Database Schema Management
-
-### Manual Schema Setup
-
-```bash
-# Apply complete schema (recommended)
-psql -d automatizaciones -f database_schema.sql
-
-# Or use Docker Compose (automatic)
+# Start worker services (in separate terminal)
+cd ../backend-worker
 docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop services
+docker-compose down
+cd ../backend-worker
+docker-compose down
 ```
 
-### Schema Updates
-
+### **Production**
 ```bash
-# For schema changes, manually run SQL commands
-psql -d automatizaciones -c "ALTER TABLE contacts ADD COLUMN new_field VARCHAR(100);"
+# Set environment variables
+export DATABASE_URL="postgresql://user:pass@host:port/db"
+export REDIS_URL="redis://host:port"
+export WHATSAPP_TOKEN="your_token"
+# ... other variables
 
-# Or create new SQL files for specific changes
-psql -d automatizaciones -f schema_update_v2.sql
+# Start production services
+docker-compose -f docker-compose.prod.yml up -d
 ```
 
-## 📈 Performance Considerations
+## 🔧 **Configuration**
 
-### Indexing Strategy
-- Primary keys and foreign keys are automatically indexed
-- JSON fields use GIN indexes for efficient querying
-- Time-based queries have dedicated indexes
-- Composite indexes for common query patterns
-
-### Scalability Features
-- Connection pooling with SQLAlchemy
-- Efficient JSON querying with PostgreSQL
-- Partitioning-ready schema design
-- Background task processing with Celery
-
-## 🔒 Security Features
-
-- Role-based access control (Admin/User)
-- JWT token authentication
-- Input validation with Pydantic
-- SQL injection prevention with SQLAlchemy ORM
-- CORS configuration for frontend integration
-
-## 🧪 Testing
-
+### **Environment Variables**
 ```bash
-# Run tests (when implemented)
-pytest
+# Database
+DATABASE_URL=postgresql://user:pass@host:port/db
 
-# Run with coverage
-pytest --cov=app
+# Redis
+REDIS_URL=redis://host:port
+CELERY_BROKER_URL=redis://host:port
+CELERY_RESULT_BACKEND=redis://host:port
+
+# Application
+DEBUG=false
+ENVIRONMENT=production
+SECRET_KEY=your_secret_key
+
+# WhatsApp
+WHATSAPP_TOKEN=your_whatsapp_token
+PHONE_NUMBER_ID=your_phone_number_id
+BUSINESS_ID=your_business_id
+WEBHOOK_VERIFY_TOKEN=your_webhook_token
+
+# CORS
+ALLOWED_ORIGINS=https://your-frontend-url.com
 ```
 
-## 🚀 Deployment
+## 🌐 **API Endpoints**
 
-### Render Deployment
+### **Message API**
+- `POST /api/messages/send` - Send WhatsApp message
+- `POST /api/messages/send-template` - Send template message
+- `GET /api/messages/` - List messages
+- `GET /api/messages/{id}` - Get specific message
+- `GET /api/messages/conversations/` - List conversations
+- `GET /api/messages/conversations/{id}` - Get conversation messages
 
-**Step 1: Create PostgreSQL Service**
-1. In Render dashboard, create a new PostgreSQL service
-2. Render automatically provides `DATABASE_URL` environment variable
-3. No manual database configuration needed!
+### **Webhook API**
+- `GET /webhooks/whatsapp` - Webhook verification
+- `POST /webhooks/whatsapp` - Receive WhatsApp webhooks
+- `POST /webhooks/whatsapp/test` - Test webhook
 
-**Step 2: Deploy Backend Service**
-1. Connect GitHub repository to Render
-2. Set environment variables (except `DATABASE_URL` - it's automatic):
-   - `WHATSAPP_TOKEN`
-   - `PHONE_NUMBER_ID` 
-   - `BUSINESS_ID`
-   - `WEBHOOK_VERIFY_TOKEN`
-   - `SECRET_KEY`
-   - `ALLOWED_ORIGINS`
-3. Deploy automatically on push to main branch
-4. Database schema is applied automatically via `database_schema.sql`
+### **Automation API**
+- `POST /api/automations/` - Create automation
+- `GET /api/automations/` - List automations
+- `GET /api/automations/{id}` - Get automation
+- `PUT /api/automations/{id}` - Update automation
+- `DELETE /api/automations/{id}` - Delete automation
+- `POST /api/automations/{id}/execute` - Execute automation
+- `GET /api/automations/stats/overview` - Get statistics
 
-**Step 3: Verify Deployment**
-- Check Render logs for successful database connection
-- Verify API endpoints at `https://your-app.onrender.com`
-- Check database schema with `psql` commands
+## 📊 **Logging**
 
-### Local Development
+### **Log Files**
+```
+logs/
+├── app.log              # Main application logs
+├── errors.log           # Error logs
+├── whatsapp.log         # WhatsApp API logs
+├── database.log         # Database operations
+└── api.log              # API requests
+```
+
+### **View Logs**
 ```bash
-# Development server with auto-reload
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+# View all logs
+docker-compose logs -f
+
+# View specific service logs
+docker-compose logs -f backend
+
+# View log files
+tail -f logs/app.log
+tail -f logs/errors.log
 ```
 
-## 📚 API Documentation
+## 🐳 **Docker Commands**
 
-Once running, visit:
-- **Swagger UI**: `http://localhost:8000/docs`
-- **ReDoc**: `http://localhost:8000/redoc`
+### **Development**
+```bash
+# Build and start
+docker-compose up --build
 
-## 🔮 Future Enhancements
+# Start in background
+docker-compose up -d
 
-- WhatsApp template message support
-- Advanced automation workflows
-- Real-time message status updates
-- Comprehensive analytics dashboard
-- Multi-language support
-- Integration with external CRMs
+# View logs
+docker-compose logs -f
 
----
+# Stop services
+docker-compose down
 
-**Phase 1 Complete**: Database schema and models are ready for WhatsApp integration and automation engine implementation.
+# Rebuild
+docker-compose up --build --force-recreate
+```
+
+### **Production**
+```bash
+# Start production
+docker-compose -f docker-compose.prod.yml up -d
+
+# View production logs
+docker-compose -f docker-compose.prod.yml logs -f
+
+# Stop production
+docker-compose -f docker-compose.prod.yml down
+```
+
+## 🔍 **Health Checks**
+
+### **API Health**
+```bash
+# Check API health
+curl http://localhost:8000/health
+
+# Check API docs
+curl http://localhost:8000/docs
+```
+
+### **Database Health**
+```bash
+# Check database connection
+docker-compose exec backend python -c "from app.database import engine; print(engine.execute('SELECT 1').scalar())"
+```
+
+### **Redis Health**
+```bash
+# Check Redis connection
+docker-compose exec redis redis-cli ping
+```
+
+## 🚀 **Deployment**
+
+### **Render Deployment**
+1. Connect GitHub repository
+2. Set environment variables
+3. Deploy as web service
+4. Configure health checks
+
+### **Docker Deployment**
+```bash
+# Build production image
+docker build -t automatizaciones-backend .
+
+# Run production container
+docker run -d \
+  --name automatizaciones-backend \
+  --env-file .env \
+  -p 8000:8000 \
+  -v $(pwd)/logs:/app/logs \
+  automatizaciones-backend
+```
+
+## 🔧 **Troubleshooting**
+
+### **Common Issues**
+
+1. **API not starting**
+   ```bash
+   # Check logs
+   docker-compose logs backend
+   
+   # Check environment variables
+   docker-compose exec backend env
+   ```
+
+2. **Database connection issues**
+   ```bash
+   # Check database connection
+   docker-compose exec backend python -c "from app.database import engine; print(engine.execute('SELECT 1').scalar())"
+   ```
+
+3. **WhatsApp integration issues**
+   ```bash
+   # Check WhatsApp configuration
+   docker-compose exec backend python -c "from app.core.config import settings; print(f'Token: {bool(settings.WHATSAPP_TOKEN)}')"
+   ```
+
+### **Debug Commands**
+```bash
+# Enter backend container
+docker-compose exec backend bash
+
+# Check Python environment
+docker-compose exec backend python -c "import sys; print(sys.path)"
+
+# Test database connection
+docker-compose exec backend python -c "from app.database import SessionLocal; db = SessionLocal(); print('DB OK')"
+
+# Test WhatsApp service
+docker-compose exec backend python -c "from app.services.whatsapp_service import whatsapp_service; print('WhatsApp OK')"
+```
+
+## 📚 **Worker Integration**
+
+This backend API integrates with the worker service through:
+
+- **Database**: Shared PostgreSQL database
+- **Redis**: Shared Redis message broker
+- **Logs**: Shared logging system
+- **Environment**: Shared environment variables
+
+The worker service processes background tasks triggered by:
+- API requests from this backend
+- Scheduled tasks via Celery Beat
+- Webhook events from WhatsApp
+- Manual automation execution
+
+## 🎯 **Performance Optimization**
+
+### **API Scaling**
+```bash
+# Scale API instances
+docker-compose up --scale backend=3
+
+# Production scaling
+docker-compose -f docker-compose.prod.yml up --scale backend=5
+```
+
+### **Resource Limits**
+- **Memory**: 512MB per instance (production)
+- **CPU**: 0.5 cores per instance (production)
+- **Connections**: 100 concurrent requests
+
+### **Database Optimization**
+- **Connection Pooling**: 20 connections
+- **Query Optimization**: Indexed tables
+- **Result Caching**: Redis-based caching
+
+This backend API provides the HTTP interface for your WhatsApp Automation MVP! 🚀

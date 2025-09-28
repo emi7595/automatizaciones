@@ -1,22 +1,19 @@
 """
-Celery configuration for background tasks and automation processing.
+Minimal Celery configuration for backend API to communicate with worker services.
+This backend only needs to send tasks to the worker, not execute them.
 """
 from celery import Celery
 from app.core.config import settings
 
-# Create Celery instance
+# Create minimal Celery instance for task queuing only
 celery_app = Celery(
     "automatizaciones",
     broker=settings.CELERY_BROKER_URL,
     backend=settings.CELERY_RESULT_BACKEND,
-    include=[
-        "app.tasks.automation_tasks",
-        "app.tasks.message_tasks",
-        "app.tasks.analytics_tasks"
-    ]
+    include=[]  # No tasks included - workers handle all task execution
 )
 
-# Celery configuration
+# Minimal Celery configuration for task queuing
 celery_app.conf.update(
     # Task execution
     task_serializer="json",
@@ -25,7 +22,7 @@ celery_app.conf.update(
     timezone="UTC",
     enable_utc=True,
     
-    # Task routing
+    # Task routing (tasks are sent to worker queues)
     task_routes={
         "app.tasks.automation_tasks.*": {"queue": "automation"},
         "app.tasks.message_tasks.*": {"queue": "messages"},
@@ -39,31 +36,7 @@ celery_app.conf.update(
     
     # Result backend settings
     result_expires=3600,  # 1 hour
-    
-    # Beat schedule for periodic tasks
-    beat_schedule={
-        "check-birthday-automations": {
-            "task": "app.tasks.automation_tasks.check_birthday_automations",
-            "schedule": 60.0,  # Run every minute
-        },
-        "process-scheduled-automations": {
-            "task": "app.tasks.automation_tasks.process_scheduled_automations",
-            "schedule": 60.0,  # Run every minute
-        },
-        "cleanup-old-logs": {
-            "task": "app.tasks.analytics_tasks.cleanup_old_logs",
-            "schedule": 604800.0,  # Weekly
-        },
-        "update-analytics": {
-            "task": "app.tasks.analytics_tasks.update_system_analytics",
-            "schedule": 3600.0,  # Hourly
-        },
-    },
 )
 
-# Optional: Configure task result backend
-if settings.ENVIRONMENT == "development":
-    celery_app.conf.update(
-        result_backend=settings.CELERY_RESULT_BACKEND,
-        result_expires=3600,
-    )
+# Note: Beat schedule and task execution are handled by backend-worker/
+# This backend only queues tasks for the worker to process

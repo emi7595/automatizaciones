@@ -1,0 +1,24 @@
+# Core dependencies for Celery workers
+python-dotenv==1.1.1
+
+# Database
+SQLAlchemy==2.0.43
+psycopg2-binary==2.9.9
+
+# Pydantic for data validation
+pydantic==2.11.9
+pydantic-settings==2.6.1
+
+# HTTP requests for WhatsApp API and Backend API
+httpx==0.28.1
+aiohttp==3.10.11
+requests==2.31.0
+
+# Background tasks and scheduling
+APScheduler==3.10.4
+celery==5.4.0
+redis==6.4.0
+
+# Utilities
+python-dateutil==2.9.0
+pytz==2024.2

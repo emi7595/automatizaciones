@@ -249,3 +249,82 @@ async def update_message_status(
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.put("/status/{whatsapp_message_id}")
+async def update_message_status_by_whatsapp_id(
+    whatsapp_message_id: str,
+    status: str,
+    timestamp: Optional[int] = None,
+    db: Session = Depends(get_db)
+):
+    """
+    Update message status by WhatsApp message ID (for webhook processing).
+    """
+    logger.info(f"API: Updating message status by WhatsApp ID: {whatsapp_message_id} -> {status}")
+    
+    try:
+        from app.models.message import Message, MessageStatus
+        
+        message = db.query(Message).filter(Message.whatsapp_message_id == whatsapp_message_id).first()
+        if not message:
+            logger.error(f"API: Message not found with WhatsApp ID: {whatsapp_message_id}")
+            raise HTTPException(status_code=404, detail="Message not found")
+        
+        old_status = message.status
+        message.update_status(MessageStatus(status), timestamp)
+        db.commit()
+        
+        logger.info(f"API: Updated message {message.id} status from {old_status} to {status}")
+        return {
+            "success": True,
+            "message_id": message.id,
+            "old_status": old_status,
+            "new_status": status
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"API: Error updating message status: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/failed")
+@log_performance()
+async def get_failed_messages(
+    limit: int = Query(100, le=1000, description="Maximum number of failed messages to return"),
+    db: Session = Depends(get_db)
+):
+    """
+    Get failed messages for retry processing.
+    """
+    logger.info("API: Getting failed messages")
+    
+    try:
+        from app.models.message import Message, MessageStatus
+        
+        failed_messages = db.query(Message).filter(
+            Message.status == MessageStatus.FAILED,
+            Message.direction == "outbound"
+        ).limit(limit).all()
+        
+        return {
+            "success": True,
+            "messages": [
+                {
+                    "id": message.id,
+                    "contact_id": message.contact_id,
+                    "content": message.content,
+                    "message_type": message.message_type.value,
+                    "user_id": message.created_by,
+                    "failed_at": message.updated_at.isoformat()
+                }
+                for message in failed_messages
+            ],
+            "count": len(failed_messages)
+        }
+        
+    except Exception as e:
+        logger.error(f"API: Error getting failed messages: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))

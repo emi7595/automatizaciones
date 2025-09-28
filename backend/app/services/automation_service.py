@@ -631,22 +631,14 @@ class AutomationService:
                 logger.info(f"TEST MODE: Would send message to {contact.name}: {message_content}")
                 return {"success": True, "message": "Test mode - message not sent"}
             
-            # Import here to avoid circular imports
-            from app.services.message_service import MessageService
-            message_service = MessageService(self.db)
-            
-            # Create message send request
-            from app.schemas.message import MessageSendRequest
-            from app.models.message import MessageType
-            
-            request = MessageSendRequest(
-                contact_id=contact.id,
-                content=message_content,
-                message_type=MessageType.TEXT
-            )
-            
-            result = await message_service.send_message(request, user_id)
-            return result
+        # Queue message sending task for worker
+        try:
+            from app.core.task_queue import TaskQueue
+            TaskQueue.queue_send_message(contact.id, message_content, user_id)
+            return {"success": True, "message": "Message queued for sending"}
+        except Exception as e:
+            logger.error(f"Error queuing message sending: {str(e)}")
+            return {"success": False, "error": str(e)}
             
         except Exception as e:
             logger.error(f"Error executing send message action: {str(e)}")

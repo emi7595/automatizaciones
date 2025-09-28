@@ -631,14 +631,10 @@ class AutomationService:
                 logger.info(f"TEST MODE: Would send message to {contact.name}: {message_content}")
                 return {"success": True, "message": "Test mode - message not sent"}
             
-        # Queue message sending task for worker
-        try:
+            # Queue message sending task for worker
             from app.core.task_queue import TaskQueue
             TaskQueue.queue_send_message(contact.id, message_content, user_id)
             return {"success": True, "message": "Message queued for sending"}
-        except Exception as e:
-            logger.error(f"Error queuing message sending: {str(e)}")
-            return {"success": False, "error": str(e)}
             
         except Exception as e:
             logger.error(f"Error executing send message action: {str(e)}")

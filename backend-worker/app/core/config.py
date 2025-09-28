@@ -23,12 +23,6 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     
-    # CORS - Dynamic frontend URL support
-    ALLOWED_ORIGINS: List[str] = [
-        "http://localhost:3000",  # Local development
-        os.getenv("FRONTEND_URL", "https://your-frontend.onrender.com")  # Production
-    ]
-    
     # Redis - Dynamic Redis URL support
     # For Render: Use database as fallback if Redis not available
     REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379")

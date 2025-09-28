@@ -2,8 +2,8 @@
 Test client to send tasks to the Railway worker.
 """
 import time
-from celery_test.celery_config import celery_app
-from celery_test.test_tasks import (
+from celery_config import celery_app
+from test_tasks import (
     simple_test_task,
     echo_task,
     processing_test_task,

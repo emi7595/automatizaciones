@@ -14,7 +14,7 @@ celery_app = Celery(
     "test_worker",
     broker=CELERY_BROKER_URL,
     backend=CELERY_RESULT_BACKEND,
-    include=["celery_test.test_tasks"]
+    include=["test_tasks"]
 )
 
 # Minimal configuration

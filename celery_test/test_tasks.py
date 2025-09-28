@@ -1,7 +1,7 @@
 """
 Simple test tasks to verify Railway worker functionality.
 """
-from celery_test.celery_config import celery_app
+from celery_config import celery_app
 import time
 import random
 

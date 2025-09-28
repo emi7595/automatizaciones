@@ -14,7 +14,9 @@ logger = get_logger(__name__)
 @celery_app.task(bind=True)
 def test_connection(self):
     """Test task to verify worker is receiving tasks."""
-    logger.info("TEST TASK RECEIVED: Worker connection is working!")
+    logger.info("🧪 TEST TASK RECEIVED: Worker connection is working!")
+    logger.info(f"🧪 Task ID: {self.request.id}")
+    logger.info(f"🧪 Task queue: {self.request.delivery_info.get('routing_key', 'unknown')}")
     return {"status": "success", "message": "Worker is receiving tasks"}
 
 

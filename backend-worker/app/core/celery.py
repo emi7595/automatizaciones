@@ -87,3 +87,11 @@ elif settings.ENVIRONMENT == "production":
         worker_max_memory_per_child=300000,  # 300MB per worker
         worker_max_tasks_per_child=100,  # More tasks before restart
     )
+
+# Debug: Log configuration on startup
+import logging
+logger = logging.getLogger(__name__)
+logger.info(f"🔧 Celery broker URL: {settings.CELERY_BROKER_URL}")
+logger.info(f"🔧 Celery result backend: {settings.CELERY_RESULT_BACKEND}")
+logger.info(f"🔧 Backend API URL: {settings.BACKEND_API_URL}")
+logger.info(f"🔧 Environment: {settings.ENVIRONMENT}")

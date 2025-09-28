@@ -26,6 +26,11 @@ celery_app.conf.update(
     timezone="UTC",
     enable_utc=True,
     
+    # Worker concurrency and memory management
+    worker_concurrency=4,  # Reduced from default 48 to 4 workers
+    worker_max_memory_per_child=200000,  # 200MB per worker process
+    worker_max_tasks_per_child=50,  # Restart worker after 50 tasks to prevent memory leaks
+    
     # Task routing
     task_routes={
         "app.tasks.automation_tasks.*": {"queue": "automation"},
@@ -38,18 +43,22 @@ celery_app.conf.update(
     worker_prefetch_multiplier=1,
     task_reject_on_worker_lost=True,
     
+    # Memory optimization
+    task_compression="gzip",  # Compress task data
+    result_compression="gzip",  # Compress result data
+    
     # Result backend settings
     result_expires=3600,  # 1 hour
     
-    # Beat schedule for periodic tasks
+    # Beat schedule for periodic tasks (optimized for memory usage)
     beat_schedule={
         "check-birthday-automations": {
             "task": "app.tasks.automation_tasks.check_birthday_automations",
-            "schedule": 60.0,  # Run every minute
+            "schedule": 300.0,  # Run every 5 minutes (reduced frequency)
         },
         "process-scheduled-automations": {
             "task": "app.tasks.automation_tasks.process_scheduled_automations",
-            "schedule": 60.0,  # Run every minute
+            "schedule": 300.0,  # Run every 5 minutes (reduced frequency)
         },
         "cleanup-old-logs": {
             "task": "app.tasks.analytics_tasks.cleanup_old_logs",
@@ -57,14 +66,24 @@ celery_app.conf.update(
         },
         "update-analytics": {
             "task": "app.tasks.analytics_tasks.update_system_analytics",
-            "schedule": 3600.0,  # Hourly
+            "schedule": 7200.0,  # Every 2 hours (reduced frequency)
         },
     },
 )
 
-# Optional: Configure task result backend
+# Environment-specific optimizations
 if settings.ENVIRONMENT == "development":
+    # Development: More conservative settings
     celery_app.conf.update(
+        worker_concurrency=2,  # Even fewer workers in development
+        worker_max_memory_per_child=100000,  # 100MB per worker
         result_backend=settings.CELERY_RESULT_BACKEND,
         result_expires=3600,
+    )
+elif settings.ENVIRONMENT == "production":
+    # Production: Optimized for production workloads
+    celery_app.conf.update(
+        worker_concurrency=6,  # Slightly more workers for production
+        worker_max_memory_per_child=300000,  # 300MB per worker
+        worker_max_tasks_per_child=100,  # More tasks before restart
     )

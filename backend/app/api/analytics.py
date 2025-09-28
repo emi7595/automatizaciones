@@ -80,7 +80,7 @@ async def update_contact_analytics(
             metric_value=metric_value,
             dimensions={
                 "contact_id": contact_id,
-                **dimensions or {}
+                **(dimensions or {})
             },
             recorded_at=datetime.now()
         )

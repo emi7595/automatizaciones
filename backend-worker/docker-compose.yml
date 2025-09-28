@@ -45,7 +45,7 @@ services:
     networks:
       - automatizaciones_network
     restart: unless-stopped
-    command: celery -A app.core.celery worker --loglevel=info --concurrency=2 --max-memory-per-child=200000
+    command: celery -A app.core.celery worker --loglevel=info --concurrency=2 --max-memory-per-child=200000 --queues=automation,messages,analytics
 
   # Celery Beat Scheduler
   celery_beat:

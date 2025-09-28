@@ -6,6 +6,10 @@ from celery import current_task
 from app.core.celery import celery_app
 from app.core.api_client import get_automations_by_trigger, execute_automation_for_contact, record_automation_result
 from app.core.logging import get_logger, log_performance
+from app.database import SessionLocal
+from app.models.automation import Automation
+from app.models.contact import Contact
+from app.services.automation_engine import AutomationEngine
 import asyncio
 
 logger = get_logger(__name__)

@@ -13,7 +13,6 @@ from app.schemas.message import (
     MessageSendRequest, MessageSearchFilters, ConversationResponse
 )
 from app.services.whatsapp_service import whatsapp_service
-from app.tasks.message_tasks import process_message_status_update
 from app.core.logging import get_logger, log_performance
 
 logger = get_logger(__name__)

@@ -4,7 +4,7 @@ Uses backend API instead of direct database access.
 """
 from celery import current_task
 from app.core.celery import celery_app
-from app.core.api_client import send_message_to_contact, get_message, update_message_status
+from app.core.api_client import send_message_to_contact, update_message_status, get_failed_messages
 from app.core.logging import get_logger, log_performance
 import asyncio
 

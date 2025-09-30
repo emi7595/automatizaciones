@@ -24,7 +24,7 @@ class BackendAPIClient:
         url = f"{self.base_url}{endpoint}"
         
         try:
-            async with httpx.AsyncClient(timeout=self.timeout) as client:
+            async with httpx.AsyncClient(timeout=self.timeout, follow_redirects=True) as client:
                 response = await client.request(method, url, **kwargs)
                 
                 # Log request details for debugging
@@ -60,7 +60,7 @@ class BackendAPIClient:
         if is_active is not None:
             params["is_active"] = is_active
         
-        return await self._make_request("GET", "/api/automations", params=params)
+        return await self._make_request("GET", "/api/automations/", params=params)
     
     async def execute_automation(self, automation_id: int, contact_id: int = None, user_id: int = None) -> Dict[str, Any]:
         """Execute automation for a specific contact."""
@@ -89,7 +89,7 @@ class BackendAPIClient:
         if tags:
             params["tags"] = ",".join(tags)
         
-        return await self._make_request("GET", "/api/contacts", params=params)
+        return await self._make_request("GET", "/api/contacts/", params=params)
     
     async def update_contact(self, contact_id: int, data: Dict[str, Any]) -> Dict[str, Any]:
         """Update contact information."""
@@ -123,7 +123,7 @@ class BackendAPIClient:
         if direction:
             params["direction"] = direction
         
-        return await self._make_request("GET", "/api/messages", params=params)
+        return await self._make_request("GET", "/api/messages/", params=params)
     
     # Analytics API methods
     async def record_automation_execution(self, automation_id: int, contact_id: int, status: str, details: Dict[str, Any] = None) -> Dict[str, Any]:

@@ -26,6 +26,18 @@ class BackendAPIClient:
         try:
             async with httpx.AsyncClient(timeout=self.timeout) as client:
                 response = await client.request(method, url, **kwargs)
+                
+                # Log request details for debugging
+                self.logger.info(f"HTTP Request: {method} {url} \"{response.status_code} {response.reason_phrase}\"")
+                
+                # For 422 errors, log the detailed validation error
+                if response.status_code == 422:
+                    try:
+                        error_details = response.json()
+                        self.logger.error(f"Validation error details: {error_details}")
+                    except:
+                        self.logger.error(f"Could not parse 422 error response")
+                
                 response.raise_for_status()
                 return response.json()
         except httpx.HTTPError as e:
@@ -93,6 +105,9 @@ class BackendAPIClient:
         }
         if user_id:
             data["user_id"] = user_id
+        
+        # Log the exact data being sent for debugging
+        self.logger.info(f"Sending message data: {data}")
         
         return await self._make_request("POST", "/api/messages/send", json=data)
     

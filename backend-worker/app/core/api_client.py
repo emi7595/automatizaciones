@@ -38,7 +38,7 @@ class BackendAPIClient:
     # Automation API methods
     async def get_automation(self, automation_id: int) -> Dict[str, Any]:
         """Get automation by ID."""
-        return await self._make_request("GET", f"api/automations/{automation_id}")
+        return await self._make_request("GET", f"/api/automations/{automation_id}")
     
     async def list_automations(self, trigger_type: str = None, is_active: bool = None) -> Dict[str, Any]:
         """List automations with optional filters."""
@@ -48,7 +48,7 @@ class BackendAPIClient:
         if is_active is not None:
             params["is_active"] = is_active
         
-        return await self._make_request("GET", "api/automations", params=params)
+        return await self._make_request("GET", "/api/automations", params=params)
     
     async def execute_automation(self, automation_id: int, contact_id: int = None, user_id: int = None) -> Dict[str, Any]:
         """Execute automation for a specific contact."""
@@ -58,16 +58,16 @@ class BackendAPIClient:
         if user_id:
             data["user_id"] = user_id
         
-        return await self._make_request("POST", f"api/automations/{automation_id}/execute", json=data)
+        return await self._make_request("POST", f"/api/automations/{automation_id}/execute", json=data)
     
     async def get_automation_stats(self, automation_id: int) -> Dict[str, Any]:
         """Get automation statistics."""
-        return await self._make_request("GET", f"api/automations/{automation_id}/stats")
+        return await self._make_request("GET", f"/api/automations/{automation_id}/stats")
     
     # Contact API methods
     async def get_contact(self, contact_id: int) -> Dict[str, Any]:
         """Get contact by ID."""
-        return await self._make_request("GET", f"api/contacts/{contact_id}")
+        return await self._make_request("GET", f"/api/contacts/{contact_id}")
     
     async def list_contacts(self, is_active: bool = None, tags: List[str] = None) -> Dict[str, Any]:
         """List contacts with optional filters."""
@@ -77,11 +77,11 @@ class BackendAPIClient:
         if tags:
             params["tags"] = ",".join(tags)
         
-        return await self._make_request("GET", "api/contacts", params=params)
+        return await self._make_request("GET", "/api/contacts", params=params)
     
     async def update_contact(self, contact_id: int, data: Dict[str, Any]) -> Dict[str, Any]:
         """Update contact information."""
-        return await self._make_request("PUT", f"api/contacts/{contact_id}", json=data)
+        return await self._make_request("PUT", f"/api/contacts/{contact_id}", json=data)
     
     # Message API methods
     async def send_message(self, contact_id: int, content: str, message_type: str = "text", user_id: int = None) -> Dict[str, Any]:
@@ -94,11 +94,11 @@ class BackendAPIClient:
         if user_id:
             data["user_id"] = user_id
         
-        return await self._make_request("POST", "api/messages/send", json=data)
+        return await self._make_request("POST", "/api/messages/send", json=data)
     
     async def get_message(self, message_id: int) -> Dict[str, Any]:
         """Get message by ID."""
-        return await self._make_request("GET", f"api/messages/{message_id}")
+        return await self._make_request("GET", f"/api/messages/{message_id}")
     
     async def list_messages(self, contact_id: int = None, direction: str = None, limit: int = 100) -> Dict[str, Any]:
         """List messages with optional filters."""
@@ -108,7 +108,7 @@ class BackendAPIClient:
         if direction:
             params["direction"] = direction
         
-        return await self._make_request("GET", "/messages", params=params)
+        return await self._make_request("GET", "/api/messages", params=params)
     
     # Analytics API methods
     async def record_automation_execution(self, automation_id: int, contact_id: int, status: str, details: Dict[str, Any] = None) -> Dict[str, Any]:
@@ -121,7 +121,7 @@ class BackendAPIClient:
         if details:
             data["details"] = details
         
-        return await self._make_request("POST", "api/analytics/automation-execution", json=data)
+        return await self._make_request("POST", "/api/analytics/automation-execution", json=data)
     
     async def update_contact_analytics(self, contact_id: int, metric_type: str, metric_value: float, dimensions: Dict[str, Any] = None) -> Dict[str, Any]:
         """Update contact analytics."""
@@ -133,7 +133,7 @@ class BackendAPIClient:
         if dimensions:
             data["dimensions"] = dimensions
         
-        return await self._make_request("POST", "api/analytics/contact-metrics", json=data)
+        return await self._make_request("POST", "/api/analytics/contact-metrics", json=data)
 
 
 # Global API client instance
@@ -184,7 +184,7 @@ async def update_message_status(whatsapp_message_id: str, status: str, timestamp
     if timestamp:
         data["timestamp"] = timestamp
     
-    return await api_client._make_request("PUT", f"api/messages/status/{whatsapp_message_id}", json=data)
+    return await api_client._make_request("PUT", f"/api/messages/status/{whatsapp_message_id}", json=data)
 
 
 async def send_whatsapp_message(contact_id: int, content: str, message_type: str = "text", user_id: int = None) -> Dict[str, Any]:
@@ -194,4 +194,4 @@ async def send_whatsapp_message(contact_id: int, content: str, message_type: str
 
 async def get_failed_messages() -> Dict[str, Any]:
     """Get failed messages from backend API."""
-    return await api_client._make_request("GET", "api/messages/failed")
+    return await api_client._make_request("GET", "/api/messages/failed")

@@ -53,7 +53,7 @@ class TaskQueue:
         try:
             celery_app.send_task(
                 'app.tasks.message_tasks.send_whatsapp_message',
-                args=[contact_id, message_content, user_id],
+                args=[contact_id, message_content, "text", user_id],  # Add message_type as "text"
                 queue='messages'
             )
             logger.info(f"Send message queued for contact {contact_id}")

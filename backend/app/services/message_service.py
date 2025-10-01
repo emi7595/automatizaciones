@@ -452,7 +452,9 @@ class MessageService:
             message.status = MessageStatus(status)
             
             if timestamp:
-                status_time = datetime.fromtimestamp(timestamp)
+                # Convert timestamp to int if it's a string
+                timestamp_int = int(timestamp) if isinstance(timestamp, str) else timestamp
+                status_time = datetime.fromtimestamp(timestamp_int)
                 if status == "delivered":
                     message.delivered_at = status_time
                 elif status == "read":
